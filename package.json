@@ -1,0 +1,27 @@
+{
+  "name": "calculator-memento-backend",
+  "version": "1.0.0",
+  "description": "Backend de calculadora con patrón Memento",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon"
+  },
+  "keywords": [
+    "calculator",
+    "memento",
+    "express",
+    "design-patterns"
+  ],
+  "author": "",
+  "license": "",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "morgan": "^1.10.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

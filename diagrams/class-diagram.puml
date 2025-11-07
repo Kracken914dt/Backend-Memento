@@ -1,0 +1,148 @@
+@startuml Diagrama de Clases - Patrón Memento
+
+!define PATTERN_COLOR #E8F5E9
+!define CONTROLLER_COLOR #E3F2FD
+!define MIDDLEWARE_COLOR #FFF3E0
+!define CONFIG_COLOR #F3E5F5
+
+title Diagrama de Clases - Calculadora con Patrón Memento
+
+' ============== PATRÓN MEMENTO ==============
+package "patterns.memento" <<Rectangle>> PATTERN_COLOR {
+  
+  class Calculator <<Originator>> {
+    - currentValue: number
+    - lastOperation: string
+    + add(value: number): number
+    + subtract(value: number): number
+    + multiply(value: number): number
+    + divide(value: number): number
+    + clear(): void
+    + getCurrentValue(): number
+    + getLastOperation(): string
+    + save(): CalculatorMemento
+    + restore(memento: CalculatorMemento): void
+    + getState(): Object
+    - validateNumber(value: any): void
+  }
+
+  class CalculatorMemento <<Memento>> {
+    - state: number
+    - timestamp: Date
+    - operation: string
+    + getState(): number
+    + getTimestamp(): Date
+    + getOperation(): string
+    + getInfo(): Object
+  }
+
+  class History <<Caretaker>> {
+    - mementos: CalculatorMemento[]
+    - currentIndex: number
+    + push(memento: CalculatorMemento): void
+    + undo(): CalculatorMemento
+    + redo(): CalculatorMemento
+    + canUndo(): boolean
+    + canRedo(): boolean
+    + getCurrentMemento(): CalculatorMemento
+    + getHistory(): Array
+    + clear(): void
+    + getInfo(): Object
+  }
+}
+
+' ============== CONTROLADORES ==============
+package "controllers" <<Rectangle>> CONTROLLER_COLOR {
+  
+  class CalculatorController <<Singleton>> {
+    - calculator: Calculator
+    - history: History
+    + performOperation(req, res, next): void
+    + clear(req, res, next): void
+    + undo(req, res, next): void
+    + redo(req, res, next): void
+    + getState(req, res, next): void
+    + getHistory(req, res, next): void
+  }
+}
+
+' ============== RUTAS ==============
+package "routes" <<Rectangle>> CONTROLLER_COLOR {
+  
+  class CalculatorRoutes <<Router>> {
+    + POST /operation
+    + POST /clear
+    + POST /undo
+    + POST /redo
+    + GET /state
+    + GET /history
+  }
+}
+
+' ============== MIDDLEWARES ==============
+package "middlewares" <<Rectangle>> MIDDLEWARE_COLOR {
+  
+  class ErrorHandler <<Middleware>> {
+    + errorHandler(err, req, res, next): void
+    + notFoundHandler(req, res): void
+  }
+}
+
+' ============== CONFIGURACIÓN ==============
+package "config" <<Rectangle>> CONFIG_COLOR {
+  
+  class ServerConfig <<Configuration>> {
+    + port: number
+    + corsOptions: Object
+  }
+}
+
+' ============== APLICACIÓN PRINCIPAL ==============
+class App <<Express>> {
+  - app: Express
+  + use(middleware): void
+  + listen(port, callback): void
+}
+
+' ============== RELACIONES DEL PATRÓN MEMENTO ==============
+Calculator "1" --> "*" CalculatorMemento : creates >
+History "1" o-- "*" CalculatorMemento : stores >
+Calculator ..> History : uses >
+
+' ============== RELACIONES DE CONTROLADORES ==============
+CalculatorController "1" *-- "1" Calculator : owns >
+CalculatorController "1" *-- "1" History : owns >
+
+' ============== RELACIONES DE ROUTING ==============
+CalculatorRoutes ..> CalculatorController : uses >
+
+' ============== RELACIONES DE APLICACIÓN ==============
+App ..> CalculatorRoutes : registers >
+App ..> ErrorHandler : uses >
+App ..> ServerConfig : uses >
+
+' ============== NOTAS ==============
+note right of Calculator
+  <b>Originator</b>
+  Crea y restaura mementos.
+  Realiza operaciones:
+  - sumar (add)
+  - restar (subtract)
+  - multiplicar (multiply)
+  - dividir (divide)
+end note
+
+note right of CalculatorMemento
+  <b>Memento</b>
+  Almacena estado inmutable
+  con timestamp y operación
+  realizada.
+end note
+
+note right of History
+  <b>Caretaker</b>
+  Gestiona historial de estados.
+  Implementa undo/redo.
+end note
+
+@enduml

@@ -1,0 +1,177 @@
+@startuml Diagrama de Componentes
+
+!define PRESENTATION_COLOR #E3F2FD
+!define BUSINESS_COLOR #E8F5E9
+!define PATTERN_COLOR #FFF9C4
+!define INFRASTRUCTURE_COLOR #F3E5F5
+
+title Diagrama de Componentes - Arquitectura Backend Calculadora
+
+skinparam component {
+  BackgroundColor<<external>> #FFCCBC
+  BackgroundColor<<routes>> PRESENTATION_COLOR
+  BackgroundColor<<controller>> BUSINESS_COLOR
+  BackgroundColor<<pattern>> PATTERN_COLOR
+  BackgroundColor<<middleware>> INFRASTRUCTURE_COLOR
+  BackgroundColor<<config>> INFRASTRUCTURE_COLOR
+}
+
+' ============== CAPA DE PRESENTACIÓN ==============
+package "Presentation Layer" {
+  
+  component "Express App" <<app>> as App {
+    [HTTP Server]
+    [Morgan Logger]
+    [CORS Handler]
+    [JSON Parser]
+  }
+
+  component "Calculator Routes" <<routes>> as Routes {
+    [POST /operation]
+    [POST /clear]
+    [POST /undo]
+    [POST /redo]
+    [GET /state]
+    [GET /history]
+  }
+}
+
+' ============== CAPA DE NEGOCIO ==============
+package "Business Layer" {
+  
+  component "Calculator Controller" <<controller>> as Controller {
+    [performOperation()]
+    [clear()]
+    [undo()]
+    [redo()]
+    [getState()]
+    [getHistory()]
+  }
+}
+
+' ============== PATRÓN MEMENTO ==============
+package "Memento Pattern Layer" <<pattern>> {
+  
+  component "Calculator (Originator)" <<pattern>> as Calculator {
+    [add()]
+    [subtract()]
+    [multiply()]
+    [divide()]
+    [save()]
+    [restore()]
+  }
+
+  component "Calculator Memento" <<pattern>> as Memento {
+    [getState()]
+    [getTimestamp()]
+    [getOperation()]
+  }
+
+  component "History (Caretaker)" <<pattern>> as History {
+    [push()]
+    [undo()]
+    [redo()]
+    [getHistory()]
+  }
+}
+
+' ============== CAPA DE INFRAESTRUCTURA ==============
+package "Infrastructure Layer" {
+  
+  component "Error Handler" <<middleware>> as ErrorMiddleware {
+    [errorHandler()]
+    [notFoundHandler()]
+  }
+
+  component "Server Config" <<config>> as Config {
+    [port]
+    [corsOptions]
+  }
+}
+
+' ============== CLIENTE EXTERNO ==============
+actor "Cliente HTTP" as Client <<external>>
+
+' ============== DEPENDENCIAS NPM ==============
+cloud "NPM Dependencies" {
+  component "Express.js" <<external>> as Express
+  component "Morgan" <<external>> as Morgan
+  component "CORS" <<external>> as CORS
+}
+
+' ============== RELACIONES DE FLUJO ==============
+
+' Cliente -> Presentación
+Client --> App : HTTP Request
+
+' Presentación
+App --> Routes : route matching
+Routes --> Controller : delegate
+
+' Negocio -> Patrón
+Controller --> Calculator : execute operation
+Controller --> History : manage state
+
+' Patrón Memento (relaciones internas)
+Calculator --> Memento : create
+History --> Memento : store/retrieve
+Calculator <-- History : restore state
+
+' Infraestructura
+App --> ErrorMiddleware : error handling
+App --> Config : configuration
+
+' Dependencias externas
+App ..> Express : uses
+App ..> Morgan : uses
+App ..> CORS : uses
+
+' Respuesta
+App --> Client : HTTP Response
+
+' ============== NOTAS ==============
+
+note right of App
+  <b>Punto de entrada</b>
+  - Configura middlewares
+  - Registra rutas
+  - Maneja errores
+  - Logging con Morgan
+end note
+
+note right of Routes
+  <b>API REST Endpoints</b>
+  Define las rutas HTTP
+  y las conecta con el
+  controlador.
+end note
+
+note bottom of Controller
+  <b>Lógica de negocio</b>
+  Orquesta las operaciones
+  entre Calculator y History.
+  Implementa patrón Singleton.
+end note
+
+note right of Calculator
+  <b>Originator</b>
+  Realiza cálculos y
+  crea/restaura snapshots
+  de su estado.
+end note
+
+note bottom of History
+  <b>Caretaker</b>
+  Gestiona línea temporal
+  de estados. Permite
+  undo/redo.
+end note
+
+note left of Memento
+  <b>Memento</b>
+  Encapsula estado
+  inmutable con
+  timestamp.
+end note
+
+@enduml

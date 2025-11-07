@@ -1,0 +1,119 @@
+@startuml Diagrama de Secuencia - Operación con Memento
+
+title Secuencia de Operación con Patrón Memento\n(Ejemplo: Sumar 10 y luego Deshacer)
+
+actor "Cliente" as Client
+participant "Express\nApp" as App
+participant "Calculator\nRoutes" as Routes
+participant "Calculator\nController" as Controller
+participant "Calculator\n(Originator)" as Calculator
+participant "History\n(Caretaker)" as History
+participant "Memento" as Memento
+
+== Operación: Sumar 10 ==
+
+Client -> App: POST /api/calculator/operation\n{"operation":"sumar", "value":10}
+activate App
+
+App -> Routes: route("/operation")
+activate Routes
+
+Routes -> Controller: performOperation(req, res, next)
+activate Controller
+
+Controller -> Controller: Validar datos (operation, value)
+
+Controller -> Calculator: add(10)
+activate Calculator
+
+Calculator -> Calculator: validateNumber(10)
+Calculator -> Calculator: currentValue += 10
+Calculator -> Calculator: lastOperation = "sumar 10"
+
+Calculator --> Controller: return 10
+deactivate Calculator
+
+Controller -> Calculator: save()
+activate Calculator
+
+Calculator -> Memento: new CalculatorMemento(10, "sumar 10")
+activate Memento
+Memento --> Calculator: memento instance
+deactivate Memento
+
+Calculator --> Controller: return memento
+deactivate Calculator
+
+Controller -> History: push(memento)
+activate History
+History -> History: mementos.push(memento)
+History -> History: currentIndex++
+History --> Controller: void
+deactivate History
+
+Controller --> Routes: res.json({success: true, result: 10, ...})
+deactivate Controller
+
+Routes --> App: response
+deactivate Routes
+
+App --> Client: 200 OK\n{"success":true, "data":{"result":10, "operation":"sumar 10"}}
+deactivate App
+
+== Operación: Deshacer (Undo) ==
+
+Client -> App: POST /api/calculator/undo
+activate App
+
+App -> Routes: route("/undo")
+activate Routes
+
+Routes -> Controller: undo(req, res, next)
+activate Controller
+
+Controller -> History: canUndo()
+activate History
+History --> Controller: true
+deactivate History
+
+Controller -> History: undo()
+activate History
+
+History -> History: currentIndex--
+History -> History: memento = mementos[currentIndex]
+
+History --> Controller: return memento
+deactivate History
+
+Controller -> Calculator: restore(memento)
+activate Calculator
+
+Calculator -> Memento: getState()
+activate Memento
+Memento --> Calculator: 0
+deactivate Memento
+
+Calculator -> Calculator: currentValue = 0
+Calculator -> Calculator: lastOperation = "restaurado: initial"
+
+Calculator --> Controller: void
+deactivate Calculator
+
+Controller --> Routes: res.json({success: true, ...})
+deactivate Controller
+
+Routes --> App: response
+deactivate Routes
+
+App --> Client: 200 OK\n{"success":true, "data":{"currentValue":0, ...}}
+deactivate App
+
+note over Client, Memento
+  <b>Patrón Memento en acción:</b>
+  1. Calculator crea un Memento después de cada operación
+  2. History almacena el Memento en su colección
+  3. En undo, History recupera el Memento anterior
+  4. Calculator restaura su estado desde el Memento
+end note
+
+@enduml
