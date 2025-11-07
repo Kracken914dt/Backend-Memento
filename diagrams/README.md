@@ -92,9 +92,3 @@ Si modificas el código, actualiza los diagramas correspondientes:
 2. **Nuevos componentes:** Agregar al diagrama de componentes
 3. **Nuevos flujos:** Crear nuevos diagramas de secuencia
 
-## 📚 Recursos
-
-- [PlantUML Language Reference](https://plantuml.com/es/)
-- [PlantUML Class Diagram](https://plantuml.com/es/class-diagram)
-- [PlantUML Component Diagram](https://plantuml.com/es/component-diagram)
-- [PlantUML Sequence Diagram](https://plantuml.com/es/sequence-diagram)
