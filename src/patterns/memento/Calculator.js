@@ -104,6 +104,21 @@ class Calculator {
   }
 
   /**
+   * Aplica el resultado de una expresión completa directamente.
+   * No registra como "sumar N" sino la expresión textual para el historial.
+   * @param {number} result
+   * @param {string} expression
+   * @returns {number}
+   */
+  applyExpressionResult(result, expression) {
+    this.#validateNumber(result);
+    this.#currentValue = result;
+    // Guardamos la expresión original (trim para limpiar espacios extremos)
+    this.#lastOperation = (typeof expression === 'string') ? expression.trim() : String(expression);
+    return this.#currentValue;
+  }
+
+  /**
    * Crea un memento con el estado actual (patrón Memento)
    * @returns {CalculatorMemento}
    */
@@ -120,7 +135,8 @@ class Calculator {
       throw new Error('El argumento debe ser una instancia de CalculatorMemento');
     }
     this.#currentValue = memento.getState();
-    this.#lastOperation = `restaurado: ${memento.getOperation()}`;
+    // Ahora sólo conservamos la expresión original sin prefijo
+    this.#lastOperation = memento.getOperation();
   }
 
   /**

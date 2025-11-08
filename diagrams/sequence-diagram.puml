@@ -1,6 +1,6 @@
 @startuml Diagrama de Secuencia - Operación con Memento
 
-title Secuencia de Operación con Patrón Memento\n(Ejemplo: Sumar 10 y luego Deshacer)
+title Secuencia de Operación con Patrón Memento\n(Ejemplo: Evaluar "5+5-2" y luego Undo)
 
 actor "Cliente" as Client
 participant "Express\nApp" as App
@@ -10,25 +10,30 @@ participant "Calculator\n(Originator)" as Calculator
 participant "History\n(Caretaker)" as History
 participant "Memento" as Memento
 
-== Operación: Sumar 10 ==
+== Operación: Evaluar Expresión ==
 
-Client -> App: POST /api/calculator/operation\n{"operation":"sumar", "value":10}
+Client -> App: POST /api/calculator/evaluate\n{"expression":"5+5-2"}
 activate App
 
-App -> Routes: route("/operation")
+App -> Routes: route("/evaluate")
 activate Routes
 
-Routes -> Controller: performOperation(req, res, next)
+Routes -> Controller: evaluateExpression(req, res, next)
 activate Controller
 
-Controller -> Controller: Validar datos (operation, value)
+Controller -> Controller: Validar datos (expression)
 
-Controller -> Calculator: add(10)
+Controller -> ExpressionEvaluator: evaluateExpression("5+5-2")
+activate ExpressionEvaluator
+ExpressionEvaluator --> Controller: 8
+deactivate ExpressionEvaluator
+
+Controller -> Calculator: applyExpressionResult(8, "5+5-2")
 activate Calculator
 
-Calculator -> Calculator: validateNumber(10)
-Calculator -> Calculator: currentValue += 10
-Calculator -> Calculator: lastOperation = "sumar 10"
+Calculator -> Calculator: validateNumber(8)
+Calculator -> Calculator: currentValue = 8
+Calculator -> Calculator: lastOperation = "5+5-2"
 
 Calculator --> Controller: return 10
 deactivate Calculator
@@ -36,7 +41,7 @@ deactivate Calculator
 Controller -> Calculator: save()
 activate Calculator
 
-Calculator -> Memento: new CalculatorMemento(10, "sumar 10")
+Calculator -> Memento: new CalculatorMemento(8, "5+5-2")
 activate Memento
 Memento --> Calculator: memento instance
 deactivate Memento
@@ -57,7 +62,7 @@ deactivate Controller
 Routes --> App: response
 deactivate Routes
 
-App --> Client: 200 OK\n{"success":true, "data":{"result":10, "operation":"sumar 10"}}
+App --> Client: 200 OK\n{"success":true, "data":{"result":8, "operation":"5+5-2"}}
 deactivate App
 
 == Operación: Deshacer (Undo) ==
@@ -94,7 +99,7 @@ Memento --> Calculator: 0
 deactivate Memento
 
 Calculator -> Calculator: currentValue = 0
-Calculator -> Calculator: lastOperation = "restaurado: initial"
+Calculator -> Calculator: lastOperation = "initial"
 
 Calculator --> Controller: void
 deactivate Calculator

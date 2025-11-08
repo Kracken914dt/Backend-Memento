@@ -1,4 +1,4 @@
-# Ejemplos de uso de la API
+# Ejemplos de uso de la API - Calculadora con Patrón Memento
 
 ## Configuración
 BASE_URL=http://localhost:3000/api/calculator
@@ -27,13 +27,12 @@ GET http://localhost:3000/api/calculator/state
 
 ---
 
-## 2. Sumar 10
-POST http://localhost:3000/api/calculator/operation
+## 2. Evaluar expresión simple: 10+10
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "sumar",
-  "value": 10
+  "expression": "10+10"
 }
 
 ### Respuesta esperada:
@@ -41,8 +40,9 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "result": 10,
-  "operation": "sumar 10",
+    "result": 20,
+    "expression": "10+10",
+  "operation": "10+10",
     "canUndo": true,
     "canRedo": false
   }
@@ -51,13 +51,12 @@ Content-Type: application/json
 
 ---
 
-## 3. Multiplicar por 5
-POST http://localhost:3000/api/calculator/operation
+## 3. Evaluar con múltiples operaciones: 10-20+5
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "multiplicar",
-  "value": 5
+  "expression": "10-20+5"
 }
 
 ### Respuesta esperada:
@@ -65,8 +64,9 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "result": 50,
-  "operation": "multiplicar 5",
+    "result": -5,
+    "expression": "10-20+5",
+  "operation": "10-20+5",
     "canUndo": true,
     "canRedo": false
   }
@@ -75,13 +75,12 @@ Content-Type: application/json
 
 ---
 
-## 4. Restar 20
-POST http://localhost:3000/api/calculator/operation
+## 4. Evaluar con multiplicación y suma: 12*0.5+20*0.5
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "restar",
-  "value": 20
+  "expression": "12*0.5+20*0.5"
 }
 
 ### Respuesta esperada:
@@ -89,8 +88,9 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "result": 30,
-  "operation": "restar 20",
+    "result": 16,
+    "expression": "12*0.5+20*0.5",
+  "operation": "12*0.5+20*0.5",
     "canUndo": true,
     "canRedo": false
   }
@@ -99,13 +99,12 @@ Content-Type: application/json
 
 ---
 
-## 5. Dividir por 3
-POST http://localhost:3000/api/calculator/operation
+## 5. Evaluar con paréntesis: (2+3)*4-5/2
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "dividir",
-  "value": 3
+  "expression": "(2+3)*4-5/2"
 }
 
 ### Respuesta esperada:
@@ -113,8 +112,9 @@ Content-Type: application/json
 {
   "success": true,
   "data": {
-    "result": 10,
-  "operation": "dividir 3",
+    "result": 17.5,
+    "expression": "(2+3)*4-5/2",
+  "operation": "(2+3)*4-5/2",
     "canUndo": true,
     "canRedo": false
   }
@@ -135,31 +135,31 @@ GET http://localhost:3000/api/calculator/history
       {
         "state": 0,
         "operation": "initial",
-        "timestamp": "2025-11-06T...",
+        "timestamp": "2025-11-08T...",
         "isCurrent": false
       },
       {
-        "state": 10,
-  "operation": "sumar 10",
-        "timestamp": "2025-11-06T...",
+        "state": 20,
+        "operation": "10+10",
+        "timestamp": "2025-11-08T...",
         "isCurrent": false
       },
       {
-        "state": 50,
-  "operation": "multiplicar 5",
-        "timestamp": "2025-11-06T...",
+        "state": -5,
+        "operation": "10-20+5",
+        "timestamp": "2025-11-08T...",
         "isCurrent": false
       },
       {
-        "state": 30,
-  "operation": "restar 20",
-        "timestamp": "2025-11-06T...",
+        "state": 16,
+        "operation": "12*0.5+20*0.5",
+        "timestamp": "2025-11-08T...",
         "isCurrent": false
       },
       {
-        "state": 10,
-  "operation": "dividir 3",
-        "timestamp": "2025-11-06T...",
+        "state": 17.5,
+        "operation": "(2+3)*4-5/2",
+        "timestamp": "2025-11-08T...",
         "isCurrent": true
       }
     ],
@@ -175,7 +175,7 @@ GET http://localhost:3000/api/calculator/history
 
 ---
 
-## 7. Deshacer (Undo) - Volver a 30
+## 7. Deshacer (Undo) - Volver al estado anterior
 POST http://localhost:3000/api/calculator/undo
 
 ### Respuesta esperada:
@@ -184,8 +184,8 @@ POST http://localhost:3000/api/calculator/undo
   "success": true,
   "message": "Operación deshecha",
   "data": {
-    "currentValue": 30,
-    "lastOperation": "restored: subtract 20",
+    "currentValue": 16,
+    "lastOperation": "12*0.5+20*0.5",
     "canUndo": true,
     "canRedo": true
   }
@@ -194,7 +194,7 @@ POST http://localhost:3000/api/calculator/undo
 
 ---
 
-## 8. Deshacer nuevamente - Volver a 50
+## 8. Deshacer nuevamente - Volver a -5
 POST http://localhost:3000/api/calculator/undo
 
 ### Respuesta esperada:
@@ -203,8 +203,8 @@ POST http://localhost:3000/api/calculator/undo
   "success": true,
   "message": "Operación deshecha",
   "data": {
-    "currentValue": 50,
-    "lastOperation": "restored: multiply 5",
+    "currentValue": -5,
+    "lastOperation": "10-20+5",
     "canUndo": true,
     "canRedo": true
   }
@@ -213,7 +213,7 @@ POST http://localhost:3000/api/calculator/undo
 
 ---
 
-## 9. Rehacer (Redo) - Volver a 30
+## 9. Rehacer (Redo) - Volver a 16
 POST http://localhost:3000/api/calculator/redo
 
 ### Respuesta esperada:
@@ -222,8 +222,8 @@ POST http://localhost:3000/api/calculator/redo
   "success": true,
   "message": "Operación rehecha",
   "data": {
-    "currentValue": 30,
-    "lastOperation": "restored: subtract 20",
+    "currentValue": 16,
+    "lastOperation": "12*0.5+20*0.5",
     "canUndo": true,
     "canRedo": true
   }
@@ -252,12 +252,11 @@ POST http://localhost:3000/api/calculator/clear
 ## Pruebas de errores
 
 ### Error: División por cero
-POST http://localhost:3000/api/calculator/operation
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "dividir",
-  "value": 0
+  "expression": "10/0"
 }
 
 ### Respuesta esperada:
@@ -272,55 +271,102 @@ Content-Type: application/json
 
 ---
 
-### Error: Operación inválida
-POST http://localhost:3000/api/calculator/operation
+### Error: Operador no soportado
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "potencia",
-  "value": 2
+  "expression": "10^2"
 }
 
 ### Respuesta esperada:
 ```json
 {
   "success": false,
-  "message": "Operación no válida. Use: add, subtract, multiply, divide"
+  "error": {
+    "message": "Símbolo no soportado: '^'"
+  }
 }
 ```
 
 ---
 
-### Error: Valor no numérico
-POST http://localhost:3000/api/calculator/operation
+### Error: Paréntesis desbalanceados
+POST http://localhost:3000/api/calculator/evaluate
 Content-Type: application/json
 
 {
-  "operation": "sumar",
-  "value": "abc"
+  "expression": "(10+5)*2)"
 }
 
 ### Respuesta esperada:
 ```json
 {
   "success": false,
-  "message": "El valor debe ser un número válido"
+  "error": {
+    "message": "Paréntesis desbalanceados"
+  }
 }
 ```
 
 ---
 
-## Comandos cURL (para terminal)
+### Error: Expresión vacía
+POST http://localhost:3000/api/calculator/evaluate
+Content-Type: application/json
+
+{
+  "expression": ""
+}
+
+### Respuesta esperada:
+```json
+{
+  "success": false,
+  "message": "El campo \"expression\" es requerido y debe ser un string"
+}
+```
+
+---
+
+## Comandos PowerShell (para Windows)
+
+```powershell
+# Estado inicial
+Invoke-RestMethod -Uri http://localhost:3000/api/calculator/state
+
+# Evaluar 10+10
+$body = '{"expression":"10+10"}'
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/calculator/evaluate -ContentType 'application/json' -Body $body
+
+# Evaluar expresión compleja
+$body = '{"expression":"(5+3)*2-4"}'
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/calculator/evaluate -ContentType 'application/json' -Body $body
+
+# Deshacer
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/calculator/undo
+
+# Rehacer
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/calculator/redo
+
+# Ver historial
+Invoke-RestMethod -Uri http://localhost:3000/api/calculator/history
+
+# Limpiar
+Invoke-RestMethod -Method Post -Uri http://localhost:3000/api/calculator/clear
+```
+
+## Comandos cURL (para Linux/Mac)
 
 ```bash
 # Estado inicial
 curl http://localhost:3000/api/calculator/state
 
-# Sumar 10
-curl -X POST http://localhost:3000/api/calculator/operation -H "Content-Type: application/json" -d "{\"operation\":\"sumar\",\"value\":10}"
+# Evaluar 10+10
+curl -X POST http://localhost:3000/api/calculator/evaluate -H "Content-Type: application/json" -d '{"expression":"10+10"}'
 
-# Multiplicar por 5
-curl -X POST http://localhost:3000/api/calculator/operation -H "Content-Type: application/json" -d "{\"operation\":\"multiplicar\",\"value\":5}"
+# Evaluar expresión compleja
+curl -X POST http://localhost:3000/api/calculator/evaluate -H "Content-Type: application/json" -d '{"expression":"(5+3)*2-4"}'
 
 # Deshacer
 curl -X POST http://localhost:3000/api/calculator/undo

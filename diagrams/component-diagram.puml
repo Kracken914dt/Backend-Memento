@@ -27,7 +27,7 @@ package "Presentation Layer" {
   }
 
   component "Calculator Routes" <<routes>> as Routes {
-    [POST /operation]
+    [POST /evaluate]
     [POST /clear]
     [POST /undo]
     [POST /redo]
@@ -40,7 +40,7 @@ package "Presentation Layer" {
 package "Business Layer" {
   
   component "Calculator Controller" <<controller>> as Controller {
-    [performOperation()]
+    [evaluateExpression()]
     [clear()]
     [undo()]
     [redo()]
@@ -57,6 +57,7 @@ package "Memento Pattern Layer" <<pattern>> {
     [subtract()]
     [multiply()]
     [divide()]
+    [applyExpressionResult()]
     [save()]
     [restore()]
   }
@@ -72,6 +73,11 @@ package "Memento Pattern Layer" <<pattern>> {
     [undo()]
     [redo()]
     [getHistory()]
+    [canUndo()/canRedo()]
+  }
+
+  component "Expression Evaluator" <<pattern>> as Evaluator {
+    [evaluateExpression()]
   }
 }
 
@@ -109,11 +115,12 @@ App --> Routes : route matching
 Routes --> Controller : delegate
 
 ' Negocio -> Patrón
-Controller --> Calculator : execute operation
+Controller --> Evaluator : parse & compute
+Controller --> Calculator : apply result
 Controller --> History : manage state
 
 ' Patrón Memento (relaciones internas)
-Calculator --> Memento : create
+Calculator --> Memento : create (save)
 History --> Memento : store/retrieve
 Calculator <-- History : restore state
 
@@ -158,6 +165,13 @@ note right of Calculator
   Realiza cálculos y
   crea/restaura snapshots
   de su estado.
+end note
+
+note right of Evaluator
+  <b>Parser/Evaluator</b>
+  Implementa algoritmo Shunting Yard
+  y evalúa RPN para obtener
+  el resultado numérico seguro.
 end note
 
 note bottom of History

@@ -7,8 +7,8 @@ const router = express.Router();
  * Rutas de la calculadora
  */
 
-// Realizar operación
-router.post('/operation', calculatorController.performOperation);
+// Evaluar expresión completa (ej: 10+20-5*2)
+router.post('/evaluate', calculatorController.evaluateExpression);
 
 // Limpiar calculadora
 router.post('/clear', calculatorController.clear);

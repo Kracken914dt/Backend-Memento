@@ -1,5 +1,6 @@
 import Calculator from '../patterns/memento/Calculator.js';
 import History from '../patterns/memento/History.js';
+import { evaluateExpression } from '../utils/expressionEvaluator.js';
 
 /**
  * Controlador de la calculadora
@@ -18,65 +19,34 @@ class CalculatorController {
   }
 
   /**
-   * Realiza una operación matemática
+   * Evalúa una expresión matemática completa en una sola petición
+   * Body esperado: { expression: "10+20*5" }
+   * Soporta: + - * / y paréntesis. Respeta precedencia de operadores.
+   * Utiliza el patrón Memento para guardar el estado y permitir undo/redo.
    */
-  performOperation = (req, res, next) => {
+  evaluateExpression = (req, res, next) => {
     try {
-      const { operation, value } = req.body;
+      const { expression } = req.body || {};
 
-      // Validaciones
-      if (!operation) {
+      if (!expression || typeof expression !== 'string') {
         return res.status(400).json({
           success: false,
-          message: 'La operación es requerida'
+          message: 'El campo "expression" es requerido y debe ser un string'
         });
       }
 
-      if (value === undefined || value === null) {
-        return res.status(400).json({
-          success: false,
-          message: 'El valor es requerido'
-        });
-      }
+  const result = evaluateExpression(expression);
 
-      const numericValue = Number(value);
-      if (isNaN(numericValue)) {
-        return res.status(400).json({
-          success: false,
-          message: 'El valor debe ser un número válido'
-        });
-      }
+  // Fijamos directamente el resultado y guardamos la EXPRESIÓN como operación
+  this.#calculator.applyExpressionResult(result, expression);
+  this.#history.push(this.#calculator.save());
 
-      // Realizar la operación (acepta nombres en español y alias comunes)
-      let result;
-      switch (operation.toLowerCase()) {
-        case 'sumar':
-          result = this.#calculator.add(numericValue);
-          break;
-        case 'restar':
-          result = this.#calculator.subtract(numericValue);
-          break;
-        case 'multiplicar':
-          result = this.#calculator.multiply(numericValue);
-          break;
-        case 'dividir':
-          result = this.#calculator.divide(numericValue);
-          break;
-        default:
-          return res.status(400).json({
-            success: false,
-            message: 'Operación no válida. Use: sumar, restar, multiplicar, dividir'
-          });
-      }
-
-      // Guardar el estado después de la operación
-      this.#history.push(this.#calculator.save());
-
-      res.json({
+      return res.json({
         success: true,
         data: {
           result,
-          operation: this.#calculator.getLastOperation(),
+          expression,
+          operation: expression,
           canUndo: this.#history.canUndo(),
           canRedo: this.#history.canRedo()
         }
