@@ -2,10 +2,7 @@ import Calculator from '../patterns/memento/Calculator.js';
 import History from '../patterns/memento/History.js';
 import { evaluateExpression } from '../utils/expressionEvaluator.js';
 
-/**
- * Controlador de la calculadora
- * Gestiona las operaciones y el historial mediante el patrón Memento
- */
+
 class CalculatorController {
   #calculator;
   #history;
@@ -18,12 +15,7 @@ class CalculatorController {
     this.#history.push(this.#calculator.save());
   }
 
-  /**
-   * Evalúa una expresión matemática completa en una sola petición
-   * Body esperado: { expression: "10+20*5" }
-   * Soporta: + - * / y paréntesis. Respeta precedencia de operadores.
-   * Utiliza el patrón Memento para guardar el estado y permitir undo/redo.
-   */
+ 
   evaluateExpression = (req, res, next) => {
     try {
       const { expression } = req.body || {};
@@ -37,7 +29,6 @@ class CalculatorController {
 
   const result = evaluateExpression(expression);
 
-  // Fijamos directamente el resultado y guardamos la EXPRESIÓN como operación
   this.#calculator.applyExpressionResult(result, expression);
   this.#history.push(this.#calculator.save());
 
@@ -56,9 +47,7 @@ class CalculatorController {
     }
   };
 
-  /**
-   * Limpia la calculadora
-   */
+
   clear = (req, res, next) => {
     try {
       this.#calculator.clear();
@@ -74,9 +63,7 @@ class CalculatorController {
     }
   };
 
-  /**
-   * Deshace la última operación
-   */
+ 
   undo = (req, res, next) => {
     try {
       if (!this.#history.canUndo()) {
@@ -103,9 +90,6 @@ class CalculatorController {
     }
   };
 
-  /**
-   * Rehace la última operación deshecha
-   */
   redo = (req, res, next) => {
     try {
       if (!this.#history.canRedo()) {
@@ -132,9 +116,7 @@ class CalculatorController {
     }
   };
 
-  /**
-   * Obtiene el estado actual
-   */
+  
   getState = (req, res, next) => {
     try {
       res.json({
@@ -149,9 +131,7 @@ class CalculatorController {
     }
   };
 
-  /**
-   * Obtiene el historial completo
-   */
+ 
   getHistory = (req, res, next) => {
     try {
       res.json({
@@ -167,5 +147,5 @@ class CalculatorController {
   };
 }
 
-// Exportar una única instancia (Singleton)
+
 export default new CalculatorController();

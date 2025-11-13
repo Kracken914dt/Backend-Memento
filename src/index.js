@@ -5,18 +5,16 @@ import morgan from 'morgan';
 import calculatorRoutes from './routes/calculator.routes.js';
 import { errorHandler, notFoundHandler } from './middlewares/errorHandler.js';
 
-/**
- * Configuración de la aplicación Express
- */
+
 const app = express();
 
-// Middlewares globales
+
 app.use(cors(serverConfig.corsOptions));
 app.use(morgan(process.env.MORGAN_FORMAT || 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-// Ruta de bienvenida
+
 app.get('/', (req, res) => {
   res.json({
     success: true,
@@ -33,14 +31,14 @@ app.get('/', (req, res) => {
   });
 });
 
-// Rutas de la API
+
 app.use('/api/calculator', calculatorRoutes);
 
-// Manejo de errores
+
 app.use(notFoundHandler);
 app.use(errorHandler);
 
-// Iniciar servidor
+
 const startServer = () => {
   try {
     app.listen(serverConfig.port, () => {

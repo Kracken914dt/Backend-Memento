@@ -15,11 +15,7 @@ class Calculator {
     this.#lastOperation = 'initial';
   }
 
-  /**
-   * Suma un valor al estado actual
-   * @param {number} value
-   * @returns {number}
-   */
+ 
   add(value) {
     this.#validateNumber(value);
     this.#currentValue += value;
@@ -27,11 +23,7 @@ class Calculator {
     return this.#currentValue;
   }
 
-  /**
-   * Resta un valor del estado actual
-   * @param {number} value
-   * @returns {number}
-   */
+  
   subtract(value) {
     this.#validateNumber(value);
     this.#currentValue -= value;
@@ -39,11 +31,7 @@ class Calculator {
     return this.#currentValue;
   }
 
-  /**
-   * Multiplica el estado actual por un valor
-   * @param {number} value
-   * @returns {number}
-   */
+  
   multiply(value) {
     this.#validateNumber(value);
     this.#currentValue *= value;
@@ -51,12 +39,7 @@ class Calculator {
     return this.#currentValue;
   }
 
-  /**
-   * Divide el estado actual por un valor
-   * @param {number} value
-   * @returns {number}
-   * @throws {Error} Si se intenta dividir por cero
-   */
+
   divide(value) {
     this.#validateNumber(value);
     if (value === 0) {
@@ -67,49 +50,29 @@ class Calculator {
     return this.#currentValue;
   }
 
-  /**
-   * Reinicia el valor de la calculadora
-   */
   clear() {
     this.#currentValue = 0;
     this.#lastOperation = 'clear';
   }
 
-  /**
-   * Valida que el valor sea un número
-   * @private
-   * @param {*} value
-   * @throws {Error} Si el valor no es un número
-   */
+ 
   #validateNumber(value) {
     if (typeof value !== 'number' || isNaN(value)) {
       throw new Error('El valor debe ser un número válido');
     }
   }
 
-  /**
-   * Obtiene el valor actual
-   * @returns {number}
-   */
+
   getCurrentValue() {
     return this.#currentValue;
   }
 
-  /**
-   * Obtiene la última operación realizada
-   * @returns {string}
-   */
+ 
   getLastOperation() {
     return this.#lastOperation;
   }
 
-  /**
-   * Aplica el resultado de una expresión completa directamente.
-   * No registra como "sumar N" sino la expresión textual para el historial.
-   * @param {number} result
-   * @param {string} expression
-   * @returns {number}
-   */
+ 
   applyExpressionResult(result, expression) {
     this.#validateNumber(result);
     this.#currentValue = result;
@@ -118,18 +81,14 @@ class Calculator {
     return this.#currentValue;
   }
 
-  /**
-   * Crea un memento con el estado actual (patrón Memento)
-   * @returns {CalculatorMemento}
-   */
+  //Crea un memento con el estado actual (patrón Memento)
   save() {
     return new CalculatorMemento(this.#currentValue, this.#lastOperation);
   }
 
-  /**
-   * Restaura el estado desde un memento (patrón Memento)
-   * @param {CalculatorMemento} memento
-   */
+  //Restaura el estado desde un memento (patrón Memento)
+  
+   
   restore(memento) {
     if (!(memento instanceof CalculatorMemento)) {
       throw new Error('El argumento debe ser una instancia de CalculatorMemento');
@@ -139,10 +98,7 @@ class Calculator {
     this.#lastOperation = memento.getOperation();
   }
 
-  /**
-   * Obtiene el estado actual de la calculadora
-   * @returns {Object}
-   */
+
   getState() {
     return {
       currentValue: this.#currentValue,

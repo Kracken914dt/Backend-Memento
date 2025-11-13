@@ -9,44 +9,29 @@ class CalculatorMemento {
   #timestamp;
   #operation;
 
-  /**
-   * @param {number} state - El valor actual de la calculadora
-   * @param {string} operation - La operación que se realizó
-   */
+ 
   constructor(state, operation = 'initial') {
     this.#state = state;
     this.#timestamp = new Date();
     this.#operation = operation;
   }
 
-  /**
-   * Obtiene el estado almacenado
-   * @returns {number}
-   */
+
   getState() {
     return this.#state;
   }
 
-  /**
-   * Obtiene la marca de tiempo
-   * @returns {Date}
-   */
+  
   getTimestamp() {
     return this.#timestamp;
   }
 
-  /**
-   * Obtiene la operación realizada
-   * @returns {string}
-   */
+
   getOperation() {
     return this.#operation;
   }
 
-  /**
-   * Obtiene información completa del memento
-   * @returns {Object}
-   */
+ 
   getInfo() {
     return {
       state: this.#state,

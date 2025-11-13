@@ -1,6 +1,4 @@
-/**
- * Middleware para manejo centralizado de errores
- */
+
 export const errorHandler = (err, req, res, next) => {
   console.error('Error:', err);
 
@@ -16,9 +14,7 @@ export const errorHandler = (err, req, res, next) => {
   });
 };
 
-/**
- * Middleware para rutas no encontradas
- */
+
 export const notFoundHandler = (req, res) => {
   res.status(404).json({
     success: false,
