@@ -94,7 +94,6 @@ class Calculator {
       throw new Error('El argumento debe ser una instancia de CalculatorMemento');
     }
     this.#currentValue = memento.getState();
-    // Ahora sólo conservamos la expresión original sin prefijo
     this.#lastOperation = memento.getOperation();
   }
 
