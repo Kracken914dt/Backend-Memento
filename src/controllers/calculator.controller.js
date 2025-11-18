@@ -1,7 +1,5 @@
 import Calculator from '../patterns/memento/Calculator.js';
 import History from '../patterns/memento/History.js';
-import { evaluateExpression } from '../utils/expressionEvaluator.js';
-
 
 class CalculatorController {
   #calculator;
@@ -27,10 +25,8 @@ class CalculatorController {
         });
       }
 
-  const result = evaluateExpression(expression);
-
-  this.#calculator.applyExpressionResult(result, expression);
-  this.#history.push(this.#calculator.save());
+      const result = this.#calculator.evaluate(expression);
+      this.#history.push(this.#calculator.save());
 
       return res.json({
         success: true,

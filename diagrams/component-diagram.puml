@@ -53,13 +53,13 @@ package "Business Layer" {
 package "Memento Pattern Layer" <<pattern>> {
   
   component "Calculator (Originator)" <<pattern>> as Calculator {
-    [add()]
-    [subtract()]
-    [multiply()]
-    [divide()]
-    [applyExpressionResult()]
+    [evaluate()]
+    [clear()]
     [save()]
     [restore()]
+    [#tokenize()]
+    [#toRPN()]
+    [#evalRPN()]
   }
 
   component "Calculator Memento" <<pattern>> as Memento {
@@ -74,10 +74,6 @@ package "Memento Pattern Layer" <<pattern>> {
     [redo()]
     [getHistory()]
     [canUndo()/canRedo()]
-  }
-
-  component "Expression Evaluator" <<pattern>> as Evaluator {
-    [evaluateExpression()]
   }
 }
 
@@ -115,8 +111,7 @@ App --> Routes : route matching
 Routes --> Controller : delegate
 
 ' Negocio -> Patrón
-Controller --> Evaluator : parse & compute
-Controller --> Calculator : apply result
+Controller --> Calculator : evaluate & manage
 Controller --> History : manage state
 
 ' Patrón Memento (relaciones internas)
@@ -162,16 +157,12 @@ end note
 
 note right of Calculator
   <b>Originator</b>
-  Realiza cálculos y
-  crea/restaura snapshots
-  de su estado.
-end note
-
-note right of Evaluator
-  <b>Parser/Evaluator</b>
-  Implementa algoritmo Shunting Yard
-  y evalúa RPN para obtener
-  el resultado numérico seguro.
+  Encapsula evaluación completa:
+  - tokenize: convierte a tokens
+  - toRPN: Shunting Yard
+  - evalRPN: evalúa RPN
+  - evaluate: método público
+  Crea/restaura snapshots.
 end note
 
 note bottom of History

@@ -13,18 +13,17 @@ package "patterns.memento" <<Rectangle>> PATTERN_COLOR {
   class Calculator <<Originator>> {
     - currentValue: number
     - lastOperation: string
-    + add(value: number): number
-    + subtract(value: number): number
-    + multiply(value: number): number
-    + divide(value: number): number
+    - operators: Object
+    + evaluate(expression: string): number
     + clear(): void
-    + applyExpressionResult(result: number, expression: string): number
     + getCurrentValue(): number
     + getLastOperation(): string
     + save(): CalculatorMemento
     + restore(memento: CalculatorMemento): void
     + getState(): Object
-    - validateNumber(value: any): void
+    - tokenize(expression: string): string[]
+    - toRPN(tokens: string[]): string[]
+    - evalRPN(rpn: string[]): number
   }
 
   class CalculatorMemento <<Memento>> {
@@ -121,25 +120,16 @@ App ..> CalculatorRoutes : registers >
 App ..> ErrorHandler : uses >
 App ..> ServerConfig : uses >
 
-' ============== UTILIDADES ==============
-package "utils" <<Rectangle>> {
-  class ExpressionEvaluator <<Utility>> {
-    + evaluateExpression(expression: string): number
-  }
-}
-
-CalculatorController ..> ExpressionEvaluator : uses >
-
 ' ============== NOTAS ==============
 note right of Calculator
   <b>Originator</b>
   Crea y restaura mementos.
-  Realiza operaciones:
-  - sumar (add)
-  - restar (subtract)
-  - multiplicar (multiply)
-  - dividir (divide)
-  - applyExpressionResult(result, expression)
+  Encapsula evaluación completa:
+  - tokenize: convierte a tokens
+  - toRPN: Shunting Yard
+  - evalRPN: evalúa RPN
+  - evaluate: evalúa expresión completa
+  Operadores: + - * /
 end note
 
 note right of CalculatorMemento

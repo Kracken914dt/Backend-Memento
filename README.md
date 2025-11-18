@@ -8,8 +8,8 @@ Backend en Express.js que implementa una calculadora con historial de estados us
 - Problema: las operaciones paso a paso complican el estado y la UX; se requiere historial confiable (undo/redo) sin exponer ni permitir modificar estados antiguos, y evitar `eval` por seguridad.
 - Requisitos funcionales: evaluar `+ - * /` con decimales y paréntesis; mantener historial navegable; exponer endpoints `/evaluate`, `/undo`, `/redo`, `/clear`, `/state`, `/history`; mostrar la expresión original en el historial y en `lastOperation`.
 - Requisitos no funcionales: parser seguro (Shunting Yard → RPN), logging HTTP (Morgan), recarga en desarrollo (Nodemon), diseño modular.
-- Solución propuesta: patrón Memento con `Calculator` (Originator), `CalculatorMemento` (Memento) y `History` (Caretaker); util `expressionEvaluator.js`; controlador orquestando evaluación y guardado de mementos; rutas REST.
-- Decisiones clave: unificar en `POST /evaluate`; `applyExpressionResult(result, expression)` guarda valor y expresión; en restore `lastOperation` usa la expresión sin prefijos; `History.push()` elimina “futuros” al escribir tras undo.
+- Solución propuesta: patrón Memento con `Calculator` (Originator que encapsula evaluación de expresiones), `CalculatorMemento` (Memento) y `History` (Caretaker); controlador orquestando guardado de mementos; rutas REST.
+- Decisiones clave: unificar en `POST /evaluate`; `Calculator.evaluate(expression)` tokeniza, convierte a RPN y evalúa internamente; en restore `lastOperation` usa la expresión sin prefijos; `History.push()` elimina "futuros" al escribir tras undo.
 - Criterios de aceptación: evaluación correcta y persistencia en historial; `GET /history` refleja expresiones y estado actual; `undo/redo` restauran valor y expresión; manejo de errores (símbolo no soportado, división por cero, paréntesis, vacío).
 - Próximos pasos (opcionales): operador potencia `^`, persistencia por usuario, autenticación/rate limiting, migración a TypeScript con interfaces.
 
@@ -17,7 +17,7 @@ Backend en Express.js que implementa una calculadora con historial de estados us
 
 El patrón Memento permite capturar y restaurar el estado interno de un objeto sin violar su encapsulación. En este proyecto:
 
-- Originator: `Calculator` (realiza operaciones y guarda su estado)
+- Originator: `Calculator` (evalúa expresiones matemáticas con parser integrado y guarda su estado)
 - Memento: `CalculatorMemento` (captura el estado + metadatos)
 - Caretaker: `History` (gestiona undo/redo sobre los mementos)
 
@@ -26,10 +26,10 @@ El patrón Memento permite capturar y restaurar el estado interno de un objeto s
 - ✅ Evaluar una expresión completa en una sola petición (`/evaluate`)
 - ✅ Operadores: `+`, `-`, `*`, `/`; paréntesis; decimales; espacios opcionales
 - ✅ Historial con undo/redo y restauración de estado previa
-- ✅ Parser seguro (sin `eval`): Shunting Yard → RPN → evaluación
+- ✅ Parser seguro (sin `eval`): Calculator integra tokenización, Shunting Yard → RPN → evaluación
 - ✅ Logging HTTP con Morgan y recarga en desarrollo con Nodemon
 - ✅ Arquitectura por capas y buenas prácticas
-- ✅ Los mementos guardan valor y la expresión original usada (sin prefijo)
+- ✅ Los mementos guardan valor y la expresión original usada
 
 ## Instalación
 
@@ -157,8 +157,8 @@ Historial completo con los estados guardados y el índice actual.
 
 ## Seguridad del parser
 
-- No se usa `eval`. Se implementa tokenización, conversión a RPN (Shunting Yard) y evaluación de pila.
-- Validaciones: símbolos soportados, división por cero, paréntesis balanceados, expresión no vacía.
+- No se usa `eval`. El `Calculator` encapsula toda la lógica: tokenización, conversión a RPN (Shunting Yard) y evaluación de pila.
+- Validaciones internas: símbolos soportados, división por cero, paréntesis balanceados, expresión no vacía.
 - Errores se devuelven con `400` y mensajes claros para el cliente.
 
 ## Estructura del proyecto
@@ -173,13 +173,11 @@ src/
 │   └── errorHandler.js             # Manejo de errores y 404
 ├── patterns/
 │   └── memento/
-│       ├── Calculator.js           # Originator
+│       ├── Calculator.js           # Originator (con parser integrado)
 │       ├── CalculatorMemento.js    # Memento
 │       └── History.js              # Caretaker
 ├── routes/
 │   └── calculator.routes.js        # Rutas de la API
-├── utils/
-│   └── expressionEvaluator.js      # Tokenizer + Shunting Yard + RPN
 └── index.js                        # Bootstrap del servidor
 
 diagrams/

@@ -23,19 +23,16 @@ activate Controller
 
 Controller -> Controller: Validar datos (expression)
 
-Controller -> ExpressionEvaluator: evaluateExpression("5+5-2")
-activate ExpressionEvaluator
-ExpressionEvaluator --> Controller: 8
-deactivate ExpressionEvaluator
-
-Controller -> Calculator: applyExpressionResult(8, "5+5-2")
+Controller -> Calculator: evaluate("5+5-2")
 activate Calculator
 
-Calculator -> Calculator: validateNumber(8)
+Calculator -> Calculator: tokenize("5+5-2")
+Calculator -> Calculator: toRPN(tokens)
+Calculator -> Calculator: evalRPN(rpn)
 Calculator -> Calculator: currentValue = 8
 Calculator -> Calculator: lastOperation = "5+5-2"
 
-Calculator --> Controller: return 10
+Calculator --> Controller: return 8
 deactivate Calculator
 
 Controller -> Calculator: save()
@@ -115,10 +112,11 @@ deactivate App
 
 note over Client, Memento
   <b>Patrón Memento en acción:</b>
-  1. Calculator crea un Memento después de cada operación
-  2. History almacena el Memento en su colección
-  3. En undo, History recupera el Memento anterior
-  4. Calculator restaura su estado desde el Memento
+  1. Calculator evalúa la expresión internamente (tokenize → RPN → eval)
+  2. Calculator crea un Memento después de cada operación
+  3. History almacena el Memento en su colección
+  4. En undo, History recupera el Memento anterior
+  5. Calculator restaura su estado desde el Memento
 end note
 
 @enduml
